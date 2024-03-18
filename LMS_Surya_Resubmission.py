@@ -1,0 +1,216 @@
+import json
+import datetime
+
+class Book:
+    def __init__(self, title, author, ISBN, quantity):
+        self.title = title
+        self.author = author
+        self.ISBN = ISBN
+        self.quantity = quantity
+    #upd_books is essentially the mutator to update the books
+    def upd_books(self, title = None, author = None, ISBN = None, quantity = None):
+        if title is not None: self.title = title
+        if author is not None: self.author = author
+        #is not none work better than putting a zero because python like considers it false
+        if ISBN is not None: self.ISBN = ISBN
+        if quantity is not None: self.quantity = quantity
+    def result(self):
+        show=(
+            f'Book Details:\n'
+            f'	Title:		{self.title}\n'
+            f'	Author:		{self.author}\n'
+            f'	ISBN:		{self.ISBN}\n'
+            f'	Quantity:	{self.quantity}'
+        )
+        return show
+
+class Patron:
+    def __init__(self,name,ID,email,phone):
+        self.name = name
+        self.ID = ID
+        self.email = email
+        self.phone = phone
+    #'None' and 'is not None' is easier to deal with cuz we are inputting many types of data(string,integer)
+    def upd_data(self, name=None, ID=None, email=None, phone=None):
+        if name is not None: self.name = name
+        if ID is not None: self.ID = ID
+        if email is not None: self.email = email
+        if phone is not None: self.phone = phone
+    def result(self):
+        show=(
+            f'Patron Information:\n'
+            f'	Name: 	{self.name}\n'
+            f'	ID: 	{self.ID}\n'
+            f'	Email: 	{self.email}\n'
+            f'	Phone:	{self.phone}'
+            )
+        return show
+    
+class Transaction:
+    def __init__(self,book,patron,Checkout_date):
+        self.book = book
+        self.patron = patron
+        self.C_out_date = Checkout_date
+        self.due_date = Checkout_date + datetime.timedelta(days = 7)
+        
+    def late_fees(self,return_date):
+        overdue =(return_date-self.due_date)
+        overdue_days = overdue.days
+        per_day_fee = 2 #essentially like $2
+        return max(0 , overdue_days * per_day_fee)
+    
+    def Checkin(self,return_date):
+        late_fee = self.late_fees(return_date)
+        print(f'The late fee for this transaction is: {late_fee}')
+        
+    def Checkout(self):
+        print(f"The Book '{self.book.title}' has been checked out by '{self.patron.name}'.")
+        
+        
+'''       
+if __name__ == "__main__":
+    # Create book and patron instances
+    book = Book("Sample Book", "Author Name", "1234567890", 3)
+    patron = Patron("Patron Name", "001", "patron@example.com", "123-456-7890")
+
+    # Perform a checkout transaction
+    checkout_date = datetime.datetime.now()
+    transaction = Transaction(book, patron, checkout_date)
+    transaction.Checkout()
+
+    # Simulate a checkin with late fees
+    return_date = checkout_date + datetime.timedelta(days=10)
+    transaction.Checkin(return_date)
+'''
+class Library:
+    def __init__(self):
+        self.books = []
+        self.patrons = []
+        self.transactions = []
+        
+    def add_books(self, title, author, ISBN, quantity):
+        new_book = Book(title, author, ISBN, quantity)
+        self.books.append(new_book)
+        print(f"Book '{title}' was added sucessfully")
+        
+    def remove_book(self,book):
+        self.books.remove(book)
+        
+    def add_patrons(self, name, ID, email, phone):
+        new_patron = Patron(name, ID, email, phone)
+        self.patrons.append(new_patron)
+        print(f"Patron '{name}' was added sucessfully")
+        
+    def remove_patron(self,patron):
+        self.patron.remove(patron)
+        
+    def handle_transaction(self,transaction):
+        self.transactions.append(transaction)
+        
+    def checkout(self,ISBN):
+        for book in self.books:
+            if book.ISBN == ISBN and book.quantity > 0:
+                book.quantity -= 1
+                print(f"Book '{book.title}' checked out sucessfully.")
+                return
+            print("Book is not available at the moment")
+            
+    def checkin(self,ISBN):
+        for book in self.books:
+            if book.ISBN == ISBN:
+                book.quantity += 1
+                print (f" Book '{book.title}' was checked in sucessfully")
+                return
+            print("The Book you checked was not found")
+            
+    def book_report(self):
+        print('The Book report:')
+        for book in self.books:
+            print(book.result())
+            
+    def patron_report(self):
+        print('The Patrons report:')
+        for patron in self.patrons:
+            print(patron.result())
+            
+    def trans_report(self):
+        print('The Transaction report:')
+        for transaction in self.transactions:
+            print(f"Book {transaction.book.title}, Patron: {transaction.patron.name}, Checkout Date: {transaction.C_out_date}, Due Date: {transaction.due_date}")
+
+
+#Same input for the data. If you want you can remove this and enter in your own data.
+
+library = Library()
+
+# Adding Books
+library.add_books("Introduction to Python", "Alex Martelli", "9781449392925", 5)
+library.add_books("Data Science Handbook", "Jake VanderPlas", "9781491912058", 3)
+
+# Adding Patrons
+library.add_patrons("John Doe", "001", "johndoe@example.com", "555-0101")
+library.add_patrons("Jane Smith", "002", "janesmith@example.com", "555-0102")
+
+# Simulating Transactions
+checkout_date = datetime.datetime.now()
+book = next(book for book in library.books if book.ISBN == "9781449392925")
+patron = next(patron for patron in library.patrons if patron.ID == "001")
+transaction = Transaction(book, patron, checkout_date)
+library.handle_transaction(transaction)
+transaction.Checkout()
+
+# Checking in a book
+library.checkin("9781449392925")
+
+# Generating Reports
+library.book_report()
+library.patron_report()
+library.trans_report()
+
+
+
+#User input section
+while True:
+    print("\nLibrary Management System")
+    print("1. Add Book")
+    print("2. Add Patron")
+    print("3. Checkout Book")
+    print("4. Checkin Book")
+    print("5. Generate Reports")
+    print("6. Exit")
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        title = input("Enter book title: ")
+        author = input("Enter author name: ")
+        ISBN = input("Enter ISBN: ")
+        quantity = int(input("Enter quantity: "))
+        library.add_books(title, author, ISBN, quantity)
+
+    elif choice == "2":
+        name = input("Enter patron's name: ")
+        ID = input("Enter patron's ID: ")
+        email = input("Enter patron's email: ")
+        phone = input("Enter patron's phone number: ")
+        library.add_patrons(name, ID, email, phone)
+
+    elif choice == "3":
+        ISBN = input("Enter ISBN of the book to checkout: ")
+        library.checkout(ISBN)
+
+    elif choice == "4":
+        ISBN = input("Enter ISBN of the book to checkin: ")
+        library.checkin(ISBN)
+
+    elif choice == "5":
+        print("\nGenerating Reports...")
+        library.book_report()
+        library.patron_report()
+        library.trans_report()
+
+    elif choice == "6":
+        print("Thank you")
+        break
+
+    else:
+        print("Invalid choice, please try again.")
